@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+<meta charset="ISO-8859-1">
+<title>Portfolio Holdings</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+	integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+	crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+
+<style>
+.customTable{
+	max-height: 80vh;
+	overflow-y: auto;
+}
+h1 {
+	font-family: "Trirong", serif;
+	text-align: center;
+	font-size: 2.0rem;
+}
+
+p {
+	text-align: center;
+}
+
+.flex-container {
+	display: flex;
+	background-color: DodgerBlue;
+	margin-top: 10px;
+	margin-top: 20px;
+	margin-bottom: 60px;
+}
+
+td {
+	text-align: center;
+}
+
+th {
+	text-align: center;
+}
+
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+</style>
+</head>
+<body class="bg-light">
+
+
+	<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+		<div class="container-fluid">
+			<!--<a class="navbar-brand" href="/">Home</a>-->
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item dropdown">
+          				<a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            			Summary
+          				</a>
+          				<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+            				<li class="dropdown-submenu"><a class="nav-link" tabindex="-1" href="#">Portfolio<span class="caret"></span></a>
+            					<ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=DBH">DBH</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=GDMF">GDMF</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=AIBL">AIBL</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=MBL">MBL</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=LRGB">LRGB</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolio?fundType=NCCBL">NCCBL</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolioAnalytics">Portfolio Analytics</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="portfolioHoldings">Portfolio Holdings</a></li>
+          							<li><a class="dropdown-item" tabindex="-1" href="weightedHoldings">Weighted Holdings</a></li>
+          						</ul>
+          					</li>
+            				<li><a class="dropdown-item" href="weeklySummary">WeeklySummary</a></li>
+          				</ul>
+       				</li>
+       				
+       				<li class="nav-item"><a class="nav-link" href="insertToFundSummary">Change Share No.</a>
+					</li>
+					<li class="nav-item"><a class="nav-link" href="viewLtp">Change LTP</a>
+					</li>
+				</ul>
+				<div sec:authorize="isAuthenticated()">
+					<span id="username_span" sec:authentication="name"></span>
+					<form th:action="@{/logout}" method="post">
+           			 <input type="submit" value="Sign Out"/>
+        		</form>
+				</div>
+			</div>
+		</div>
+	</nav>
+	
+	
+	
+	
+	<div class="container-xxl">
+		<section>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; margin-bottom: 20px;">
+            <h1 style="font-size: 30px; color: #3366cc; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); font-family: Arial, sans-serif; margin: 0 auto;">Portfolio Holdings</h1>
+            <div>
+                <button id="downloadButton" class="btn btn-primary">Download Excel</button>
+            </div>
+        </div>
+    </section>
+		
+        <div class="table-responsive customTable">
+  		<table class="table table-striped table-bordered">
+			 <thead class="table-success">
+   				 <tr>
+   				 	<th scope="col">Ticker</th>
+   				 	<th scope="col">Total Holding</th>     		
+     				<th scope="col">DBH</th>
+      				<th scope="col">GDMF</th>      				
+      				<th scope="col">AIBL</th>
+      				<th scope="col">MBL</th>
+      				<th scope="col">LRGB</th>      				
+      				<th scope="col">NCCBL</th>
+      				<th scope="col">Avg. Cost</th> 
+      				<th scope="col">Market Price</th> 
+      				<th scope="col">Cost Value</th> 
+      				<th scope="col">Market Value</th>
+      				<th scope="col">Gain/Loss</th>
+      				<th scope="col">Gain/Loss (%)</th>
+      				<th scope="col">Cash Return (%)</th>
+      				<th scope="col">Total Return (%)</th>
+      				<th scope="col">Price Weight (%)</th>
+      				<th scope="col">Market Weight (%)</th>
+      				<th scope="col">Over/UnderWeight (%)</th>
+      				<th scope="col">Base Value</th>
+      				<th scope="col">Best Value</th>
+      				<th scope="col">Worst Value</th>     				    				
+    			</tr>
+  			</thead>
+  			
+  			<tbody>
+    			<tr th:each = "fundSummary, iterator: ${tempPortfolioHoldings}"> 
+    				<td style="text-align: left;"th:text="${fundSummary.code}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.totalHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.dbhHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.gdmfHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.aiblHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.mblHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.lrgbHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.nccblHolding, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.avgCost, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.marketPrice, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.costValue, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.marketValue, 2, 'COMMA', 2, 'POINT')}"></td>
+    				<td th:text="${#numbers.formatDecimal(fundSummary.gainLoss, 2, 'COMMA', 2, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.gainLossRatio, 2, 'COMMA', 2, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.cashReturnRatio, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.totalReturnRatio, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.priceWeightRatio, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.marketWeightRatio, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.overUnderWeightRatio, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.baseValue, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.bestValue, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.worstValue, 1, 'COMMA', 5, 'POINT')}"></td>  				
+    			</tr>
+ 			</tbody>
+		</table>
+	</div>		
+	</div>
+	
+	<script th:inline="javascript">
+		function deleteWeeklyNav(id){
+			var span = document.getElementById('username_span');
+			var input = document.getElementById('username_input');
+			var name=span.innerText;
+			
+			console.log(name);
+			  let text = "You want to Delete ?";
+			  if (confirm(text) == true) {
+					$.ajax({
+		       			url : "/deleteWeeklyNAV",
+		            	data : {'username': name, id: id},
+		            	type : 'POST',
+		            	 success : function(result) {
+		                 	window.location.reload(true);
+		            	 }
+					});
+			  }
+		}
+		
+		function moveWeeklyNavToArchive(){
+			var span = document.getElementById('username_span');
+			var name=span.innerText;
+			
+			  let text = "Move Data to Production ?";
+			  if (confirm(text) == true) {
+					$.ajax({
+		       			url : "/mutualFundNav",
+		            	data : {'username': name},
+		            	type : 'POST',
+		            	 success : function(result) {
+		                 	window.location.reload(true);
+		            	 }
+					});
+			  }
+		}
+	</script>
+	
+		<script>
+		$(document).ready(function(){
+  			$('.dropdown-submenu a.nav-link').on("click", function(e){
+    		$(this).next('ul').toggle();
+    		e.stopPropagation();
+   	 		e.preventDefault();
+  		});
+	});
+	</script>
+	<script>
+    	function downloadExcel() {
+     	   var table = document.querySelector('.table-striped');
+     	   var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet 1" });
+     	   XLSX.writeFile(wb, 'Portfolio Holdings.xlsx');
+   	 }
+
+   	 document.getElementById('downloadButton').addEventListener('click', downloadExcel);
+	</script>
+</body>
+</html>

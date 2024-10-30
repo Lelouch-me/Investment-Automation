@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+<meta charset="ISO-8859-1">
+<title>Mutual Fund</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+	integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+	crossorigin="anonymous"></script>
+
+<style>
+h1 {
+	font-family: "Trirong", serif;
+	text-align: center;
+	font-size: 2.0rem;
+}
+
+p {
+	text-align: center;
+}
+
+.flex-container {
+	display: flex;
+	background-color: DodgerBlue;
+	margin-top: 10px;
+	margin-top: 20px;
+	margin-bottom: 60px;
+}
+
+td {
+	text-align: center;
+}
+
+th {
+	text-align: center;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 1.0rem;
+}
+</style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+    <div class="container-fluid">
+        <!--<a class="navbar-brand" href="/">Home</a>-->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="mutualFundNav">MFnav</a></li>
+                <li class="nav-item"><a class="nav-link" href="nav">NAV(Other)</a></li>
+                <li class="nav-item"><a class="nav-link" href="eps">EPS</a></li>
+                <li class="nav-item"><a class="nav-link" href="divYield">Dividend Yield</a></li>
+                <li class="nav-item"><a class="nav-link" href="debtToEquity">Debt To Equity</a></li>
+                <li class="nav-item"><a class="nav-link" href="ltmSalesInfo">Sales Info</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Summary
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                        <li><a class="dropdown-item" href="portfolio">Portfolio</a></li>
+                        <li><a class="dropdown-item" href="weeklySummary">WeeklySummary</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div sec:authorize="isAuthenticated()">
+                <span id="username_span" sec:authentication="name"></span>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" value="Sign Out"/>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Tab navigation -->
+    <ul class="nav nav-tabs" id="myTabs" role="tablist">
+    </ul>
+</div>
+
+<div class="container">
+    <!-- Tab content -->
+    <div class="tab-content" id="myTabsContent">
+    		<div class="container"> 		
+  		<table class="table table-striped table-bordered">
+			 <thead class="table-success">
+   				 <tr>
+   				 	<th scope="col">Ticker</th>
+   				 	<th scope="col">Fund_Share</th>     		
+     				<th scope="col">Avg.Cost</th>
+      				<th scope="col">LTP</th>      				
+      				<th scope="col">Cost Value</th>
+      				<th scope="col">Market Value</th>
+      				<th scope="col">Gain/Loss(BDT)</th>      				
+      				<th scope="col">Gain/Loss(%)</th>
+      				<th scope="col">LR_Weights(%)</th> 
+      				<th scope="col">DSEX_Weights(%)</th> 
+      				<th scope="col">Weights compared to DSEX</th> 
+      				    				
+    			</tr>
+  			</thead>
+  			
+  			<tbody>
+    			<tr th:each = "fundSummary, iterator: ${tempFundSummary}"> 
+    				<td style="text-align: left;"th:text="${fundSummary.code}"></td>  
+      				<td th:text="${#numbers.formatDecimal(fundSummary.fundShare, 2, 'COMMA', 0, 'POINT')}"></td>
+      				<td th:text="${fundSummary.avgCost}"></td>
+      				<td th:text="${fundSummary.ltp}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.costValue, 2, 'COMMA', 2, 'POINT')}"></td>
+      				<td th:text="${#numbers.formatDecimal(fundSummary.marketValue, 2, 'COMMA', 2, 'POINT')}"></td>
+      				<td th:style="${fundSummary.gainLossBDT >= 0 ? 'color: green;' : 'color: red;'}"
+    					th:text="${#numbers.formatDecimal(fundSummary.gainLossBDT, 2, 'COMMA', 2, 'POINT')}"></td>
+
+      				<td th:style="${fundSummary.gainLossRatio >= 0 ? 'color: green;' : 'color: red;'}"
+    					th:text="${!fundSummary.gainLossRatio.isNaN()} ? ${#numbers.formatDecimal(fundSummary.gainLossRatio, 2, 'COMMA', 4, 'POINT')} : ''"></td>
+
+      				<td th:text="${#numbers.formatDecimal(fundSummary.lR_Weight, 1, 'COMMA', 5, 'POINT')}"></td>
+      				<td th:text="${fundSummary.dSEX_Weight== 0.0} ? '' : ${#numbers.formatDecimal(fundSummary.dSEX_Weight, 1, 'COMMA', 5, 'POINT')}"></td>     				
+      				<td th:style = "${fundSummary.lRtoDESX == 'OverWeight'} ? 'color: blue' : 'color: orange'" th:text="${fundSummary.lRtoDESX}"></td>
+   				
+    			</tr>
+ 			</tbody>
+		</table>
+	</div>
+    </div>
+</div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const tabNames = ["DBH", "GDMF", "Tab 3", "Tab 4", "Tab 5", "Tab 6"];
+    	const Container = document.getElementById("myTabs");
+    	const ContentContainer = document.getElementById("myTabsContent");
+
+    	for (let i = 0; i < tabNames.length; i++) {
+        	const tab = document.createElement("li");
+        	tab.className = "nav-item";
+        	tab.innerHTML = `<a class="nav-link${i == 0 ? ' active' : ''}" id="tab${i + 1}" data-bs-toggle="tab" href="#section${i + 1}" role="tab" aria-controls="section${i + 1}" aria-selected="${i == 0}">${tabNames[i]}</a>`;
+        	const tabContent = document.createElement("div");
+        	tabContent.className = "tab-pane fade" + (i == 0 ? ' show active' : '');
+        	tabContent.id = `section${i + 1}`;
+        	tabContent.role = "tabpanel";
+        	tabContent.setAttribute("aria-labelledby", `tab${i + 1}`);
+        	tabContent.innerHTML = `<h1>${tabNames[i]} Content</h1>`;
+        	Container.appendChild(tab);
+        	ContentContainer.appendChild(tabContent);
+    	}
+	});
+</script>
+
+</body>
+</html>
